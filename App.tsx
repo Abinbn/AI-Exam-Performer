@@ -36,8 +36,12 @@ const App: React.FC = () => {
     setExamConfig(config);
     try {
       const generatedExam = await generateExam(config);
-      setExam(generatedExam);
-      setUserAnswers(generatedExam.questions.map(q => ({ questionId: q.id, answer: '' })));
+      // Sort questions by marks in ascending order as a safeguard
+      const sortedQuestions = [...generatedExam.questions].sort((a, b) => a.marks - b.marks);
+      const examWithSortedQuestions = { ...generatedExam, questions: sortedQuestions };
+
+      setExam(examWithSortedQuestions);
+      setUserAnswers(examWithSortedQuestions.questions.map(q => ({ questionId: q.id, answer: '' })));
       setInitialTimeLeft(null); // Reset for new exam
       setAppState(AppState.EXAM);
     } catch (err) {

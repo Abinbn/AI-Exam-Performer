@@ -24,8 +24,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers,
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const timerRef = useRef<number | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-
+  
   const currentQuestion = exam.questions[currentQuestionIndex];
 
   // Autosave answers and time to localStorage
@@ -35,25 +34,29 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers,
     }
   }, [answers, timeLeft, exam, isSubmitting]);
 
-  // Timer countdown effect
+  // Timer countdown effect - runs only once on mount
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prevTime => {
-        if (prevTime <= 1) {
-          clearInterval(timerRef.current!);
-          if (formRef.current && !isSubmitting) {
-             formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-          }
-          return 0;
-        }
-        return prevTime - 1;
-      });
+    timerRef.current = window.setInterval(() => {
+      setTimeLeft(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isSubmitting]);
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Effect to handle auto-submission when time runs out
+  useEffect(() => {
+    if (timeLeft === 0 && !isSubmitting) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      alert("Time is up! Your exam will be submitted automatically.");
+      setIsSubmitting(true);
+      onSubmit(answers);
+    }
+  }, [timeLeft, isSubmitting, onSubmit, answers]);
+
 
   const handleInputChange = (questionId: number, value: string) => {
     setAnswers(prevAnswers =>
@@ -71,6 +74,14 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers,
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    const answeredQuestionsCount = answers.filter(a => a.answer.trim() !== '').length;
+    const requiredAnswers = Math.ceil(exam.questions.length / 2);
+
+    if (answeredQuestionsCount < requiredAnswers) {
+        alert(`You must answer at least 50% of the questions (${requiredAnswers} questions) to submit the exam. You have currently answered ${answeredQuestionsCount}.`);
+        return;
+    }
 
     if (timeLeft > 0) {
         const confirmed = window.confirm("Are you sure you want to submit your exam?");
@@ -150,7 +161,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers,
         
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md -mt-2" role="alert">{error}</div>}
 
-        <form onSubmit={handleSubmit} ref={formRef} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
             <div className="text-center font-medium text-slate-500">
                 Question {currentQuestionIndex + 1} of {exam.questions.length}
             </div>

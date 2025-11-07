@@ -49,11 +49,13 @@ const ChipGroup = <T extends string | number>({ title, options, selectedValue, o
 
 
 const ConfigScreen: React.FC<ConfigScreenProps> = ({ onStartExam, error }) => {
-  const [classLevel, setClassLevel] = useState(CLASS_LEVELS[2]);
-  const [subject, setSubject] = useState(SUBJECTS[0]);
-  const [examType, setExamType] = useState(EXAM_TYPES[0]);
-  const [duration, setDuration] = useState(DURATIONS[3]);
-  const [totalMarks, setTotalMarks] = useState(TOTAL_MARKS[3]);
+  // FIX: Explicitly type the state with the union of all possible values from the constants array.
+  // This resolves the TypeScript error where the inferred type of the state was too narrow for the `onSelect` prop of `ChipGroup`.
+  const [classLevel, setClassLevel] = useState<typeof CLASS_LEVELS[number]>(CLASS_LEVELS[2]);
+  const [subject, setSubject] = useState<typeof SUBJECTS[number]>(SUBJECTS[0]);
+  const [examType, setExamType] = useState<typeof EXAM_TYPES[number]>(EXAM_TYPES[0]);
+  const [duration, setDuration] = useState<typeof DURATIONS[number]>(DURATIONS[3]);
+  const [totalMarks, setTotalMarks] = useState<typeof TOTAL_MARKS[number]>(TOTAL_MARKS[3]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingConfig, setPendingConfig] = useState<ExamConfig | null>(null);

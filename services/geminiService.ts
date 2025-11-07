@@ -62,11 +62,13 @@ export const generateExam = async (config: ExamConfig): Promise<Exam> => {
         5.  Ensure the number and complexity of questions are reasonable for the given duration.
         6.  For MCQs, provide 4 distinct options with one correct answer. The 'value' should be a simple identifier (e.g., 'a', 'b', 'c', 'd') and 'label' should be the option text.
         7.  Assign a unique integer 'id' to each question, starting from 1.
-        8.  Return the output as a single JSON object that strictly follows the provided schema. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure.
+        8.  The questions array MUST be sorted in ascending order based on the 'marks' for each question (e.g., questions with 2 marks first, then 5 marks, then 10 marks).
+        9.  Return the output as a single JSON object that strictly follows the provided schema. Do not include any introductory text, explanations, or markdown formatting outside the JSON structure.
     `;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-lite',
+        // FIX: Updated model name to 'gemini-flash-lite-latest' according to the API guidelines.
+        model: 'gemini-flash-lite-latest',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
