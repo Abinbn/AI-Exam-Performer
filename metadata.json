@@ -1,0 +1,5 @@
+{
+  "name": "AI Quiz Generator",
+  "description": "An AI-driven quiz and exam web application that dynamically creates, conducts, and evaluates tests. Students can select their class, subject, and exam purpose to receive a tailored question set with detailed performance feedback.",
+  "requestFramePermissions": []
+}
