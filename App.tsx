@@ -3,11 +3,11 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { ExamConfig, Exam, EvaluationReport, AppState, UserAnswer } from './types';
 import ConfigScreen from './components/ConfigScreen';
 import ExamScreen from './components/ExamScreen';
-import ReportScreen from './components/ReportScreen';
 import Header from './components/Header';
 import { generateExam, evaluateExam } from './services/geminiService';
 import LoadingSpinner from './components/LoadingSpinner';
 import { loadExamState, clearExamState } from './services/storageService';
+import ResultSheet from './components/ResultSheet';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.CONFIG);
@@ -63,10 +63,9 @@ const App: React.FC = () => {
         return;
     }
     try {
-      // FIX: Pass the examConfig to the evaluateExam function to provide necessary context.
       const evaluationReport = await evaluateExam(exam, answers, examConfig);
       setReport(evaluationReport);
-      setAppState(AppState.REPORT);
+      setAppState(AppState.REVIEW); // Transition to the new REVIEW state
     } catch (err) {
       console.error(err);
       setError('Failed to evaluate the exam. Please try submitting again.');
@@ -98,9 +97,20 @@ const App: React.FC = () => {
         return <LoadingSpinner message="Loading exam..." />;
       case AppState.EVALUATING:
         return <LoadingSpinner message="AI is evaluating your answers... This may take a moment for detailed feedback." />;
-      case AppState.REPORT:
+      case AppState.REVIEW:
         if (report && exam) {
-          return <ReportScreen report={report} exam={exam} userAnswers={userAnswers} onRestart={handleRestart} />;
+          return (
+            <>
+              <ExamScreen 
+                exam={exam} 
+                examConfig={examConfig!} 
+                initialAnswers={userAnswers} 
+                report={report} // Pass report to enable review mode
+                onSubmit={() => {}} // No-op submit in review mode
+              />
+              <ResultSheet report={report} exam={exam} onRestart={handleRestart} />
+            </>
+          );
         }
         return <LoadingSpinner message="Generating report..." />;
       default:

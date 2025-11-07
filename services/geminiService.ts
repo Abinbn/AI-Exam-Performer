@@ -67,7 +67,6 @@ export const generateExam = async (config: ExamConfig): Promise<Exam> => {
     `;
 
     const response = await ai.models.generateContent({
-        // FIX: Updated model name to 'gemini-flash-lite-latest' according to the API guidelines.
         model: 'gemini-flash-lite-latest',
         contents: prompt,
         config: {
@@ -107,7 +106,6 @@ const evaluationSchema = {
 };
 
 
-// FIX: The function now accepts `config` to provide subject context for the evaluation.
 export const evaluateExam = async (exam: Exam, answers: UserAnswer[], config: ExamConfig): Promise<EvaluationReport> => {
     const questionsAndAnswers = exam.questions.map(q => {
         const answer = answers.find(a => a.questionId === q.id);
@@ -129,13 +127,13 @@ export const evaluateExam = async (exam: Exam, answers: UserAnswer[], config: Ex
 
         Instructions:
         1.  Evaluate each question's answer based on the criteria above.
-        2.  Assign a score for each answer ('assignedScore'), which must not exceed the maximum marks for that question.
-        3.  Provide specific feedback for EACH question's answer in the 'feedback' field:
+        2.  Assign a score for each answer ('assignedScore'), which must not exceed the maximum marks for that question. For answers that are completely wrong or not answered, the assigned score must be 0.
+        3.  Provide specific, actionable feedback for EACH question's answer in the 'feedback' field:
             - If the answer is INCORRECT or PARTIALLY CORRECT: Give a detailed, constructive explanation. Clearly state what was wrong, what key points were missed, and provide the correct information. Explain any misconceptions. This is the most critical part of the feedback.
-            - If the answer is CORRECT: Provide a brief, encouraging confirmation like "Excellent work!" or "Correct, you've clearly understood the concept."
+            - If the answer is CORRECT: Provide a brief, encouraging confirmation like "Excellent work! You've correctly identified the key concepts." or "Correct, your explanation is clear and accurate."
         4.  Calculate the total 'overallScore' by summing up all 'assignedScore' values.
-        5.  Based on the entire performance, summarize the student's key 'strengths' and 'weaknesses' (3-4 points each).
-        6.  Provide a list of 3-4 actionable 'recommendations' for improvement.
+        5.  Based on the entire performance, summarize the student's key 'strengths' and 'weaknesses' (3-4 concise bullet points each).
+        6.  Provide a list of 3-4 actionable 'recommendations' for improvement (e.g., "Focus on practicing numerical problems in Chapter 3," or "Review the timeline of historical events in the 19th century.").
         7.  Return the entire evaluation as a single, valid JSON object that strictly follows the provided schema. Do not include any text, markdown, or explanations outside the JSON object.
 
         Here is the exam data (questions and student answers):

@@ -4,7 +4,7 @@ export enum AppState {
   GENERATING = 'GENERATING',
   EXAM = 'EXAM',
   EVALUATING = 'EVALUATING',
-  REPORT = 'REPORT',
+  REVIEW = 'REVIEW', // Replaced REPORT with REVIEW
 }
 
 export interface ExamConfig {
