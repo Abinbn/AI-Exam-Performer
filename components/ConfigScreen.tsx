@@ -85,23 +85,24 @@ const ConfigScreen: React.FC<ConfigScreenProps> = ({ onStartExam, error }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          <ChipGroup title="Class / Grade" options={CLASS_LEVELS} selectedValue={classLevel} onSelect={setClassLevel} />
-          <ChipGroup title="Subject" options={SUBJECTS} selectedValue={subject} onSelect={setSubject} />
-          <ChipGroup title="Exam Type" options={EXAM_TYPES} selectedValue={examType} onSelect={setExamType} />
+          {/* FIX: Wrap state setters in lambdas to match the expected '(value: T) => void' signature. */}
+          <ChipGroup title="Class / Grade" options={CLASS_LEVELS} selectedValue={classLevel} onSelect={(value) => setClassLevel(value)} />
+          <ChipGroup title="Subject" options={SUBJECTS} selectedValue={subject} onSelect={(value) => setSubject(value)} />
+          <ChipGroup title="Exam Type" options={EXAM_TYPES} selectedValue={examType} onSelect={(value) => setExamType(value)} />
           
           <div className="pt-2 space-y-6">
              <ChipGroup 
                 title="Duration" 
                 options={DURATIONS} 
                 selectedValue={duration} 
-                onSelect={setDuration}
+                onSelect={(value) => setDuration(value)}
                 renderLabel={(d) => `${d} minutes`}
              />
              <ChipGroup 
                 title="Total Marks" 
                 options={TOTAL_MARKS} 
                 selectedValue={totalMarks} 
-                onSelect={setTotalMarks}
+                onSelect={(value) => setTotalMarks(value)}
                 renderLabel={(m) => `${m} marks`}
              />
           </div>

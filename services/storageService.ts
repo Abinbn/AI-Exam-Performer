@@ -1,5 +1,5 @@
 
-import { Exam, UserAnswer } from '../types';
+import { Exam, UserAnswer, ExamConfig } from '../types';
 
 const EXAM_STATE_KEY = 'aiExamProState';
 
@@ -7,6 +7,7 @@ export interface SavedExamState {
   exam: Exam;
   userAnswers: UserAnswer[];
   timeLeft: number;
+  examConfig: ExamConfig;
 }
 
 export const saveExamState = (state: SavedExamState): void => {

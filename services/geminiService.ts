@@ -107,7 +107,8 @@ const evaluationSchema = {
 };
 
 
-export const evaluateExam = async (exam: Exam, answers: UserAnswer[]): Promise<EvaluationReport> => {
+// FIX: The function now accepts `config` to provide subject context for the evaluation.
+export const evaluateExam = async (exam: Exam, answers: UserAnswer[], config: ExamConfig): Promise<EvaluationReport> => {
     const questionsAndAnswers = exam.questions.map(q => {
         const answer = answers.find(a => a.questionId === q.id);
         return {
@@ -117,7 +118,7 @@ export const evaluateExam = async (exam: Exam, answers: UserAnswer[]): Promise<E
     });
     
     const prompt = `
-        You are a highly experienced and fair examiner with deep expertise in the subject of ${exam.questions[0] ? 'the relevant subject' : 'various subjects'}. Your task is to evaluate a student's exam answers based on the provided questions. Provide a detailed, constructive, and encouraging evaluation.
+        You are a highly experienced and fair examiner with deep expertise in the subject of ${config.subject}. Your task is to evaluate a student's exam answers based on the provided questions. Provide a detailed, constructive, and encouraging evaluation.
 
         Evaluation Criteria:
         - Content Accuracy & Factual Correctness

@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Exam, UserAnswer, Question, QuestionType } from '../types';
+import { Exam, UserAnswer, Question, QuestionType, ExamConfig } from '../types';
 import { saveExamState } from '../services/storageService';
 
 interface ExamScreenProps {
   exam: Exam;
+  examConfig: ExamConfig;
   onSubmit: (answers: UserAnswer[]) => void;
   initialAnswers: UserAnswer[];
   initialTimeLeft?: number | null;
@@ -17,7 +18,7 @@ const formatTime = (seconds: number) => {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers, initialTimeLeft, error }) => {
+const ExamScreen: React.FC<ExamScreenProps> = ({ exam, examConfig, onSubmit, initialAnswers, initialTimeLeft, error }) => {
   const [answers, setAnswers] = useState<UserAnswer[]>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState(initialTimeLeft ?? exam.duration * 60);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,9 +31,9 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, onSubmit, initialAnswers,
   // Autosave answers and time to localStorage
   useEffect(() => {
     if (!isSubmitting) {
-      saveExamState({ exam, userAnswers: answers, timeLeft });
+      saveExamState({ exam, userAnswers: answers, timeLeft, examConfig });
     }
-  }, [answers, timeLeft, exam, isSubmitting]);
+  }, [answers, timeLeft, exam, isSubmitting, examConfig]);
 
   // Timer countdown effect - runs only once on mount
   useEffect(() => {

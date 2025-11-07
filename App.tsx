@@ -25,6 +25,7 @@ const App: React.FC = () => {
       setExam(savedState.exam);
       setUserAnswers(savedState.userAnswers);
       setInitialTimeLeft(savedState.timeLeft);
+      setExamConfig(savedState.examConfig); // Also load config for submission
       setAppState(AppState.EXAM);
     }
   }, []);
@@ -62,7 +63,8 @@ const App: React.FC = () => {
         return;
     }
     try {
-      const evaluationReport = await evaluateExam(exam, answers);
+      // FIX: Pass the examConfig to the evaluateExam function to provide necessary context.
+      const evaluationReport = await evaluateExam(exam, answers, examConfig);
       setReport(evaluationReport);
       setAppState(AppState.REPORT);
     } catch (err) {
@@ -90,8 +92,8 @@ const App: React.FC = () => {
       case AppState.GENERATING:
         return <LoadingSpinner message="Generating your custom exam..." />;
       case AppState.EXAM:
-        if (exam) {
-          return <ExamScreen exam={exam} onSubmit={handleSubmitExam} initialAnswers={userAnswers} initialTimeLeft={initialTimeLeft} error={error} />;
+        if (exam && examConfig) {
+          return <ExamScreen exam={exam} examConfig={examConfig} onSubmit={handleSubmitExam} initialAnswers={userAnswers} initialTimeLeft={initialTimeLeft} error={error} />;
         }
         return <LoadingSpinner message="Loading exam..." />;
       case AppState.EVALUATING:
