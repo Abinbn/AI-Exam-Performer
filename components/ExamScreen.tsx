@@ -36,6 +36,11 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, examConfig, onSubmit, ini
   const [isTimerRunning, setIsTimerRunning] = useState(!isReviewMode);
 
   const currentQuestion = exam.questions[currentQuestionIndex];
+  
+  // FIX: Safely find the feedback for the current question to prevent crashes on render.
+  const questionFeedback = isReviewMode
+    ? report.detailedFeedback?.find(f => f.questionId === currentQuestion.id)
+    : null;
 
   // Autosave answers and time to localStorage, but only in exam mode
   useEffect(() => {
@@ -102,8 +107,10 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, examConfig, onSubmit, ini
         if (!confirmed) return;
     }
     
+    console.log('[ExamScreen] Attempting to submit...');
     setIsTimerRunning(false);
     setIsSubmitting(true);
+    console.log('[ExamScreen] isSubmitting state set to true. Calling onSubmit prop.');
     onSubmit(answers);
   };
   
@@ -191,9 +198,9 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, examConfig, onSubmit, ini
                     <p className="text-lg font-semibold text-slate-800 flex-1">
                         {`Q${currentQuestionIndex + 1}: ${currentQuestion.text}`}
                     </p>
-                    <span className={`ml-4 flex-shrink-0 text-sm font-medium px-2.5 py-0.5 rounded-full ${isReviewMode ? getScoreColor(report.detailedFeedback.find(f=>f.questionId===currentQuestion.id)?.assignedScore ?? 0, currentQuestion.marks) : 'bg-blue-100 text-blue-800'}`}>
+                    <span className={`ml-4 flex-shrink-0 text-sm font-medium px-2.5 py-0.5 rounded-full ${isReviewMode ? getScoreColor(questionFeedback?.assignedScore ?? 0, currentQuestion.marks) : 'bg-blue-100 text-blue-800'}`}>
                         {isReviewMode 
-                            ? `${report.detailedFeedback.find(f=>f.questionId===currentQuestion.id)?.assignedScore} / ${currentQuestion.marks} Marks`
+                            ? `${questionFeedback?.assignedScore ?? 'N/A'} / ${currentQuestion.marks} Marks`
                             : `${currentQuestion.marks} Marks`
                         }
                     </span>
@@ -201,7 +208,8 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ exam, examConfig, onSubmit, ini
                 <div className="flex-grow">
                   {renderQuestionInput(currentQuestion)}
                 </div>
-                {isReviewMode && renderFeedback(report.detailedFeedback.find(f => f.questionId === currentQuestion.id)!)}
+                {/* FIX: Only render feedback if it exists for the current question */}
+                {isReviewMode && questionFeedback && renderFeedback(questionFeedback)}
             </div>
 
             <div className={`sticky bottom-4 z-5 flex justify-between items-center gap-4 ${isReviewMode ? 'pb-24' : ''}`}>

@@ -53,23 +53,31 @@ const App: React.FC = () => {
   }, []);
 
   const handleSubmitExam = useCallback(async (answers: UserAnswer[]) => {
+    console.log('[App] handleSubmitExam triggered.');
     setAppState(AppState.EVALUATING);
     setError(null);
     setUserAnswers(answers);
+    console.log('[App] AppState set to EVALUATING. User answers captured:', answers);
     clearExamState(); // Exam is finished, clear from storage
     if (!exam || !examConfig) {
+        console.error('[App] Missing exam or examConfig on submit.');
         setError('Exam data is missing. Please restart.');
         setAppState(AppState.CONFIG);
         return;
     }
     try {
+      console.log('[App] Calling evaluateExam service...');
       const evaluationReport = await evaluateExam(exam, answers, examConfig);
+      console.log('[App] evaluateExam success. Report received:', evaluationReport);
       setReport(evaluationReport);
       setAppState(AppState.REVIEW); // Transition to the new REVIEW state
+      console.log('[App] AppState set to REVIEW.');
     } catch (err) {
-      console.error(err);
-      setError('Failed to evaluate the exam. Please try submitting again.');
+      console.error('[App] evaluateExam failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred during evaluation.';
+      setError(`Failed to evaluate the exam. Please try submitting again. Details: ${errorMessage}`);
       setAppState(AppState.EXAM); // Go back to exam screen on failure
+      console.log('[App] AppState set back to EXAM due to error.');
     }
   }, [exam, examConfig]);
 

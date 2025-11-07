@@ -140,18 +140,42 @@ export const evaluateExam = async (exam: Exam, answers: UserAnswer[], config: Ex
         ${JSON.stringify(questionsAndAnswers)}
     `;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: prompt,
-        config: {
-            responseMimeType: 'application/json',
-            responseSchema: evaluationSchema,
-            thinkingConfig: {
-                thinkingBudget: 32768,
-            },
-        },
-    });
+    console.log('[geminiService] Sending evaluation prompt to Gemini...');
 
+    let response;
+    try {
+        response = await ai.models.generateContent({
+            model: 'gemini-2.5-pro',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: evaluationSchema,
+                thinkingConfig: {
+                    thinkingBudget: 32768,
+                },
+            },
+        });
+        console.log('[geminiService] Raw response from Gemini received.');
+    } catch (apiError) {
+        console.error('[geminiService] Gemini API call failed:', apiError);
+        throw new Error('The AI model failed to respond. Please check your connection or API key.');
+    }
+    
     const jsonString = response.text.trim();
-    return JSON.parse(jsonString) as EvaluationReport;
+    console.log('[geminiService] Raw JSON string from Gemini:', jsonString);
+
+    if (!jsonString) {
+        console.error('[geminiService] Received empty response from Gemini.');
+        throw new Error('The AI model returned an empty response.');
+    }
+    
+    try {
+        const parsedJson = JSON.parse(jsonString);
+        console.log('[geminiService] Successfully parsed JSON.');
+        return parsedJson as EvaluationReport;
+    } catch (parseError) {
+        console.error('[geminiService] Failed to parse JSON response:', parseError);
+        console.error('[geminiService] Invalid JSON string was:', jsonString);
+        throw new Error('The AI model returned an invalid data format.');
+    }
 };
